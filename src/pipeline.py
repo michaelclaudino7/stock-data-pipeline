@@ -12,6 +12,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 from src.config import API_KEY, STOCKS, DATA_DIR, LOG_DIR
 from src.data_validator import DataValidator
 from src.utils import setup_logging, send_alert
+from src.database import Database
 
 
 class StockDataPipeline:
@@ -22,6 +23,7 @@ class StockDataPipeline:
         self.stocks = STOCKS
         self.logger = logging.getLogger(__name__)
         self.validator = DataValidator()
+        self.db = Database()
         
     def extract_stock_data(self, symbol):
         try:
@@ -73,24 +75,22 @@ class StockDataPipeline:
             return
         
         try:
-            df = pd.DataFrame(data_list)
+            # Save to database
+            for data in data_list:
+                self.db.insert_stock_price(data)
             
+            # Also save to CSV as backup
+            df = pd.DataFrame(data_list)
             date_str = datetime.now().strftime('%Y%m%d')
             filename = f"stock_data_{date_str}.csv"
             filepath = os.path.join(DATA_DIR, filename)
             
             if os.path.exists(filepath):
                 df.to_csv(filepath, mode='a', header=False, index=False)
-                self.logger.info(f"Data appended to {filename}")
             else:
                 df.to_csv(filepath, index=False)
-                self.logger.info(f"Created {filename}")
                 
-            history_file = os.path.join(DATA_DIR, "stock_data_history.csv")
-            if os.path.exists(history_file):
-                df.to_csv(history_file, mode='a', header=False, index=False)
-            else:
-                df.to_csv(history_file, index=False)
+            self.logger.info(f"Data saved to database and {filename}")
                 
         except Exception as e:
             self.logger.error(f"Save failed: {e}")
