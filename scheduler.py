@@ -21,20 +21,20 @@ def run_scheduled_pipeline():
         logging.error(f"Scheduled execution failed: {e}")
         print(f"Error: {e}")
     
-    print(f"Next execution in 1 hour\n")
+    print(f"Next execution tomorrow at 18:00\n")
 
 
 if __name__ == "__main__":
     setup_logging()
     
     print("Stock Data Pipeline Scheduler")
-    print("Running every hour. Press Ctrl+C to stop.\n")
+    print("Running daily at 18:00. Press Ctrl+C to stop.\n")
     
     # Run immediately on start
     run_scheduled_pipeline()
     
-    # Schedule future runs
-    schedule.every(1).hour.do(run_scheduled_pipeline)
+    # Schedule daily at 18:00 (after market close)
+    schedule.every().day.at("18:00").do(run_scheduled_pipeline)
     
     try:
         while True:
