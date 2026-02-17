@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = os.path.join(BASE_DIR, 'data')
@@ -8,8 +11,7 @@ LOG_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(LOG_DIR, exist_ok=True)
 
-# Get API key from environment or use demo
-API_KEY = 'IDULAX2S3NDE4AG3'
+API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY', 'demo')
 
 # Stocks to monitor
 STOCKS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
